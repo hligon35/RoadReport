@@ -1,5 +1,8 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, Button, Picker } from 'react-native';
+import { View, Text, TextInput, Button } from 'react-native';
+// Picker moved to community package. Install with:
+// expo install @react-native-picker/picker
+import { Picker } from '@react-native-picker/picker';
 import { DataContext } from '../context/DataContext';
 
 const categories = ['fuel', 'maintenance', 'tolls', 'parking', 'other'];

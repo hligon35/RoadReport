@@ -1,14 +1,14 @@
 import React, { useContext } from 'react';
-import { SafeAreaView, View, Text, Button } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, Button } from 'react-native';
 import { AuthContext } from '../context/AuthContext';
 
 const SettingsScreen = () => {
   const { user, loginMock, logout, upgradeToPaidMock } = useContext(AuthContext);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={[ 'left', 'right', 'bottom' ]}>
       <View style={{ padding: 16 }}>
-        <Text style={{ fontSize: 22 }}>Settings</Text>
         <Text>User: {user ? user.name : 'Not logged in'}</Text>
         {!user ? (
           <Button title="Mock Login" onPress={() => loginMock('demo@example.com')} />
