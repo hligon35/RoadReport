@@ -10,13 +10,13 @@ const ReportsScreen = () => {
   const [report, setReport] = useState(null);
 
   const generate = () => {
-    const r = TaxReportService.generateTaxReport({ trips: mileage, expenses });
+    const r = TaxReportService.generateTaxReport({ routes: mileage, expenses });
     setReport(r);
     // placeholder: export CSV or PDF
   };
 
   const exportCSV = async () => {
-    const csv = ExportService.generateTripsCSV(mileage);
+    const csv = ExportService.generateRoutesCSV(mileage);
     const path = await ExportService.saveCSVToFile(`roadreport_${Date.now()}.csv`, csv);
     if (path) {
       Alert.alert('Export complete', `CSV saved to ${path}`);
@@ -24,7 +24,7 @@ const ReportsScreen = () => {
   };
 
   const exportPDF = async () => {
-    const html = ExportService.generateTripsHTML(mileage);
+    const html = ExportService.generateRoutesHTML(mileage);
     const path = await ExportService.saveHTMLAsPDF(`roadreport_${Date.now()}.pdf`, html);
     if (path) {
       Alert.alert('Export complete', `PDF saved to ${path}`);

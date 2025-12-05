@@ -5,12 +5,12 @@ const startDriveMonitoring = async (onDriveDetected) => {
   // TODO: hook into location subscription (expo-location or react-native-geolocation)
   // For now, simulate a detected drive after 3s
   setTimeout(() => {
-    const sample = {
+      const sample = {
       id: `auto:${Date.now()}`,
       start: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
       end: new Date().toISOString(),
       distance: 8.2,
-      purpose: 'Unclassified',
+        purpose: 'Miscellaneous',
       status: 'pending',
       notes: '',
     };

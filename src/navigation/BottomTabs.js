@@ -15,8 +15,8 @@ export const BottomTabs = () => {
   const { mileage, expenses } = useContext(DataContext);
 
   const unclassifiedExists = useMemo(() => {
-    const uTrips = (mileage || []).some((t) => !t.purpose || String(t.purpose).toLowerCase().includes('unclass'));
-    const uExpenses = (expenses || []).some((e) => !e.classification || String(e.classification).toLowerCase().includes('unclass'));
+    const uTrips = (mileage || []).some((t) => !t.purpose || String(t.purpose).toLowerCase().includes('misc'));
+    const uExpenses = (expenses || []).some((e) => !e.classification || String(e.classification).toLowerCase().includes('misc'));
     return uTrips || uExpenses;
   }, [mileage, expenses]);
 

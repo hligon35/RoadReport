@@ -39,7 +39,7 @@ const DriveCard = ({ drive = {}, weekDeduction = null, onDelete = () => {}, onRe
         </View>
         <View style={{ alignItems: 'flex-end' }}>
           <Text style={styles.value}>${value}</Text>
-          <Tag label={drive.purpose || 'Unclassified'} color={drive.status === 'logged' ? '#4caf50' : '#ff9800'} />
+          <Tag label={drive.purpose || 'Miscellaneous'} color={drive.status === 'logged' ? '#4caf50' : '#ff9800'} />
         </View>
       </View>
 

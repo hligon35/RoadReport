@@ -8,7 +8,7 @@ const KEY_MILEAGE = 'rr:mileage:v1';
 const KEY_EXPENSES = 'rr:expenses:v1';
 
 export const DataProvider = ({ children }) => {
-  const [mileage, setMileage] = useState([]); // array of trips
+  const [mileage, setMileage] = useState([]); // array of routes
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +20,7 @@ export const DataProvider = ({ children }) => {
         const e = await AsyncStorage.getItem(KEY_EXPENSES);
         if (m) setMileage(JSON.parse(m));
         if (e) setExpenses(JSON.parse(e));
-        // DEV: if no mileage persisted and running in dev, seed with 5 dummy trips
+          // DEV: if no mileage persisted and running in dev, seed with 5 dummy routes
         if (__DEV__) {
           const hasMileage = m && Array.isArray(JSON.parse(m)) && JSON.parse(m).length > 0;
           if (!hasMileage) {
@@ -66,6 +66,21 @@ export const DataProvider = ({ children }) => {
                 purpose: 'Business - Airport',
                 classification: 'business',
                 startCoords: { latitude: 37.8049, longitude: -122.3994 },
+              },
+              // add a miscellaneous route for dev testing
+              {
+                id: `dev-${Date.now()}-un-1`,
+                start: makeISO(new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000)),
+                distance: 7.6,
+                // purpose intentionally left undefined to mark miscellaneous
+                startCoords: { latitude: 37.7929, longitude: -122.4100 },
+              },
+              {
+                id: `dev-${Date.now()}-un-2`,
+                start: makeISO(new Date(now.getTime() - 6 * 24 * 60 * 60 * 1000)),
+                distance: 3.9,
+                purpose: 'miscellaneous',
+                startCoords: { latitude: 37.7829, longitude: -122.4200 },
               },
             ];
             setMileage(sample);
@@ -116,6 +131,21 @@ export const DataProvider = ({ children }) => {
                 description: 'Equipment',
                 classification: 'business',
               },
+              // miscellaneous expense samples
+              {
+                id: `dev-exp-${Date.now()}-un-1`,
+                date: makeISO2(new Date(now2.getTime() - 3 * 24 * 60 * 60 * 1000)),
+                amount: 19.99,
+                description: 'Parking fee',
+                // classification intentionally missing
+              },
+              {
+                id: `dev-exp-${Date.now()}-un-2`,
+                date: makeISO2(new Date(now2.getTime() - 7 * 24 * 60 * 60 * 1000)),
+                amount: 6.5,
+                description: 'Beverage',
+                classification: 'miscellaneous',
+              },
             ];
             setExpenses(sampleExpenses);
             try {
@@ -154,31 +184,31 @@ export const DataProvider = ({ children }) => {
     })();
   }, [expenses]);
 
-  const addTrip = (trip) => {
-    setMileage((s) => [trip, ...s]);
+  const addRoute = (route) => {
+    setMileage((s) => [route, ...s]);
     // fire-and-forget cloud sync
     try {
-      CloudSyncService.syncToCloud([trip]);
+      CloudSyncService.syncToCloud([route]);
     } catch (e) {
-      console.warn('addTrip cloud sync failed', e);
+      console.warn('addRoute cloud sync failed', e);
     }
   };
 
-  const updateTrip = (updated) => {
+  const updateRoute = (updated) => {
     setMileage((s) => s.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
     try {
       CloudSyncService.syncToCloud([updated]);
     } catch (e) {
-      console.warn('updateTrip cloud sync failed', e);
+      console.warn('updateRoute cloud sync failed', e);
     }
   };
 
-  const deleteTrip = (trip) => {
-    setMileage((s) => s.filter((t) => t.id !== trip.id));
+  const deleteRoute = (route) => {
+    setMileage((s) => s.filter((t) => t.id !== route.id));
     try {
-      CloudSyncService.syncToCloud([{ id: trip.id, _deleted: true }]);
+      CloudSyncService.syncToCloud([{ id: route.id, _deleted: true }]);
     } catch (e) {
-      console.warn('deleteTrip cloud sync failed', e);
+      console.warn('deleteRoute cloud sync failed', e);
     }
   };
 
@@ -206,7 +236,7 @@ export const DataProvider = ({ children }) => {
   };
 
   return (
-    <DataContext.Provider value={{ mileage, expenses, loading, addTrip, updateTrip, deleteTrip, addExpense, clearAll }}>
+    <DataContext.Provider value={{ mileage, expenses, loading, addRoute, updateRoute, deleteRoute, addExpense, clearAll }}>
       {children}
     </DataContext.Provider>
   );

@@ -4,20 +4,20 @@ import { DataContext } from '../context/DataContext';
 import { useLocationTracker } from '../hooks/useLocation';
 
 export const MileageTracker = () => {
-  const { addTrip } = useContext(DataContext);
+  const { addRoute } = useContext(DataContext);
   const { tracking, start, stop, distanceMiles } = useLocationTracker();
   const [purpose, setPurpose] = useState('');
 
   const handleStop = () => {
-    // Save trip
-    const trip = {
-      id: `t-${Date.now()}`,
+    // Save route
+    const route = {
+      id: `r-${Date.now()}`,
       start: new Date().toISOString(),
       end: new Date().toISOString(),
       distance: distanceMiles,
       purpose,
     };
-    addTrip(trip);
+    addRoute(route);
     stop();
   };
 
@@ -33,9 +33,9 @@ export const MileageTracker = () => {
         style={{ borderWidth: 1, padding: 8, marginVertical: 8 }}
       />
       {!tracking ? (
-        <Button title="Start Trip" onPress={start} />
+        <Button title="Start Route" onPress={start} />
       ) : (
-        <Button title="Stop & Save Trip" onPress={handleStop} />
+        <Button title="Stop & Save Route" onPress={handleStop} />
       )}
       <Text style={{ marginTop: 12, color: '#666' }}>
         Note: Location permissions and background tracking require Expo Location and platform setup.

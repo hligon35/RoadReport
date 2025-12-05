@@ -274,8 +274,8 @@ const Dashboard = () => {
   }, [mileage, expenses, rightStart, rightEnd]);
 
   const unclassifiedCount = useMemo(() => {
-    const uTrips = (mileage || []).filter((t) => !t.purpose || String(t.purpose).toLowerCase().includes('unclass'));
-    const uExpenses = (expenses || []).filter((e) => !e.classification || String(e.classification).toLowerCase().includes('unclass'));
+    const uTrips = (mileage || []).filter((t) => !t.purpose || String(t.purpose).toLowerCase().includes('misc'));
+    const uExpenses = (expenses || []).filter((e) => !e.classification || String(e.classification).toLowerCase().includes('misc'));
     return (uTrips.length || 0) + (uExpenses.length || 0);
   }, [mileage, expenses]);
 
@@ -314,8 +314,8 @@ const Dashboard = () => {
 
   const metrics = [
     {
-      key: 'trips',
-      title: 'Trips',
+      key: 'routes',
+      title: 'Routes',
       subtitle: `${tripsWeekCount || 0} this week`,
       weekPct: tripsWeekPct,
       monthPct: tripsMonthPct,
@@ -355,7 +355,7 @@ const Dashboard = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Three metric tiles: Trips, Miles, Expenses (enlarged) */}
+      {/* Three metric tiles: Routes, Miles, Expenses (enlarged) */}
       <View style={{ marginBottom: 16 }}>
         {(() => {
           const isBusiness = (s) => String(s || '').toLowerCase().includes('bus');
@@ -385,7 +385,7 @@ const Dashboard = () => {
               <View style={MIDDLE_STYLE}>
                 <Text style={TITLE_STYLE}>{tile.title}</Text>
                 <Text style={SUBTITLE_STYLE}>{tile.subtitle}</Text>
-                {tile.key === 'trips' ? (
+                {tile.key === 'routes' ? (
                   <>
                     <Text style={VALUE_STYLE}>{`${weekTripBusinessCount} business • ${weekTripPersonalCount} personal`}</Text>
                     <Text style={USAGE_STYLE}>{`Usage Value: $${Number(weekEstimatedDeduction || 0).toFixed(2)}`}</Text>

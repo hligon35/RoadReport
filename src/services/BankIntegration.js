@@ -8,13 +8,13 @@ const fetchBankTransactions = async (opts = {}) => {
   // Simulate network delay
   await new Promise((r) => setTimeout(r, 300));
   // Return a mapped list that matches the expense schema used by the app
-  return SAMPLE_TXNS.map((t) => ({
+    return SAMPLE_TXNS.map((t) => ({
     id: `bank:${t.id}`,
     date: t.date,
     amount: t.amount,
     category: t.category,
     notes: t.description,
-    classification: 'unclassified',
+      classification: 'miscellaneous',
     source: 'bank',
   }));
 };

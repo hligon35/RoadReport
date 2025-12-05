@@ -30,9 +30,9 @@ describe('Dashboard (render)', () => {
     // Basic assertions to ensure important pieces are present
     expect(getByText(/This Week/i)).toBeTruthy();
     expect(getByText(/Last 30 Days/i)).toBeTruthy();
-    // Trips label appears at least once
-    expect(getAllByText(/Trips/i).length).toBeGreaterThanOrEqual(1);
-    // Check that the trips count (2) is rendered somewhere
+    // Routes label appears at least once
+    expect(getAllByText(/Routes/i).length).toBeGreaterThanOrEqual(1);
+    // Check that the routes count (2) is rendered somewhere
     expect(getByText('2')).toBeTruthy();
   });
 });

@@ -14,7 +14,7 @@ const startOfMonth = (d) => {
 };
 
 const DrivesScreen = () => {
-  const { mileage, expenses, addTrip, updateTrip, deleteTrip } = useContext(DataContext);
+  const { mileage, expenses, addRoute, updateRoute, deleteRoute } = useContext(DataContext);
 
   // Fallback mock data when there are no drives yet
   const mockDrives = [
@@ -75,7 +75,7 @@ const DrivesScreen = () => {
     if (!drive || !drive.id) return;
     // remove from store and keep a copy to allow undo
     setLastDeleted(drive);
-    deleteTrip(drive);
+    deleteRoute(drive);
     // show undo (animate in)
     Animated.timing(undoAnim, { toValue: 1, duration: 200, useNativeDriver: true }).start();
     // auto clear after 7s
@@ -86,12 +86,12 @@ const DrivesScreen = () => {
 
   const handleReclassify = (drive) => {
     const newPurpose = drive.purpose === 'Business' ? 'Personal' : 'Business';
-    updateTrip({ ...drive, purpose: newPurpose });
+    updateRoute({ ...drive, purpose: newPurpose });
   };
 
   const handleSave = (updated) => {
     // persist updated drive
-    if (updated && updated.id) updateTrip(updated);
+    if (updated && updated.id) updateRoute(updated);
   };
 
   return (
@@ -159,7 +159,7 @@ const DrivesScreen = () => {
             <Text style={{ color: '#fff', flex: 1 }}>Drive deleted</Text>
             <TouchableOpacity onPress={() => {
               // restore
-              addTrip(lastDeleted);
+              addRoute(lastDeleted);
               setLastDeleted(null);
               Animated.timing(undoAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start();
             }}>

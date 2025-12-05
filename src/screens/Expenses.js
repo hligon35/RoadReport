@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
 import useExpenses from '../hooks/useExpenses';
 import ExpenseForm from '../components/ExpenseForm';
 
-const ExpenseItem = ({ item }) => (
-  <View style={{ padding: 12, borderBottomWidth: 1, borderColor: '#efefef' }}>
-    <Text style={{ fontWeight: '700' }}>{item.category} — ${item.amount}</Text>
-    <Text style={{ color: '#666' }}>{item.date} • {item.classification || 'Unclassified'}</Text>
-    {item.notes ? <Text style={{ marginTop: 6 }}>{item.notes}</Text> : null}
-  </View>
-);
+const ExpenseItem = ({ item }) => {
+  const img = item.image || 'https://via.placeholder.com/160x120?text=Receipt';
+  return (
+    <View style={{ padding: 12, borderRadius: 10, backgroundColor: '#fff', marginTop: 12, borderWidth: 1, borderColor: '#eee', flexDirection: 'row', overflow: 'hidden', minHeight: 110 }}>
+      <View style={{ width: '35%', paddingRight: 8 }}>
+        <Image source={{ uri: img }} style={{ width: '100%', height: 90, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
+      </View>
+      <View style={{ width: '65%', justifyContent: 'center' }}>
+        <Text style={{ fontWeight: '700' }}>{item.description || item.category || 'Expense'} — ${item.amount}</Text>
+        <Text style={{ color: '#666', marginTop: 6 }}>{item.date} • {item.classification || 'Miscellaneous'}</Text>
+        {item.notes ? <Text style={{ marginTop: 6 }}>{item.notes}</Text> : null}
+      </View>
+    </View>
+  );
+};
 
 const Expenses = () => {
   const { expenses, addExpense, importBankTransactions } = useExpenses();
