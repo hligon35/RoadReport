@@ -1,6 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Summaries from '../screens/Summaries';
+import Reports from '../screens/Reports';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,9 +15,9 @@ const SummariesStack = () => (
     }}
   >
     <Stack.Screen
-      name="SummariesMain"
-      component={Summaries}
-      options={{ title: 'Summaries' }}
+      name="ReportsMain"
+      component={Reports}
+      options={{ title: 'Reports' }}
     />
   </Stack.Navigator>
 );

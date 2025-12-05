@@ -5,7 +5,7 @@ import React, { createContext, useState, useEffect } from 'react';
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // {id, name, role: 'free'|'paid'}
+  const [user, setUser] = useState(null); // {id, name, email, role: 'free'|'paid'}
 
   useEffect(() => {
     // TODO: load user from SecureStore on mount
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginMock = async (email) => {
     // Mock login: in future replace with real auth + Stripe checks
-    const mockUser = { id: 'u1', name: 'Demo User', role: 'free' };
+    const mockUser = { id: 'u1', name: 'Demo User', email: email || 'demo@example.com', role: 'free' };
     setUser(mockUser);
     // await SecureStore.setItemAsync('user', JSON.stringify(mockUser));
     return mockUser;

@@ -5,12 +5,15 @@ import { useNavigation } from '@react-navigation/native';
 import DashboardScreen from '../screens/DashboardScreen';
 import Miscellaneous from '../screens/Miscellaneous';
 import { DataContext } from '../context/DataContext';
+import { ModalCloseContext } from '../context/ModalCloseContext';
+import ProfileHeaderButton from '../components/ProfileHeaderButton';
 
 const Stack = createNativeStackNavigator();
 
 const UnclassifiedHeaderButton = () => {
   const navigation = useNavigation();
   const { mileage, expenses } = useContext(DataContext);
+  const { closeAll } = useContext(ModalCloseContext) || {};
 
   const uTrips = (mileage || []).filter((t) => !t.purpose || String(t.purpose).toLowerCase().includes('misc'));
   const uExpenses = (expenses || []).filter((e) => !e.classification || String(e.classification).toLowerCase().includes('misc'));
@@ -18,7 +21,7 @@ const UnclassifiedHeaderButton = () => {
 
   return (
     <TouchableOpacity
-      onPress={() => navigation.navigate('Miscellaneous')}
+      onPress={() => { try { closeAll && closeAll(); } catch (e) {} ; navigation.navigate('Miscellaneous'); }}
       style={{ marginLeft: 8, flexDirection: 'row', alignItems: 'center' }}
       accessibilityRole="button"
       accessibilityLabel={`Miscellaneous items ${count}`}
@@ -63,7 +66,7 @@ const DashboardStack = () => {
       <Stack.Screen
         name="DashboardMain"
         component={DashboardScreen}
-        options={{ title: 'Dashboard', headerLeft: () => <UnclassifiedHeaderButton /> }}
+        options={{ title: 'Dashboard', headerLeft: () => <UnclassifiedHeaderButton />, headerRight: () => <ProfileHeaderButton /> }}
       />
       <Stack.Screen
         name="Miscellaneous"

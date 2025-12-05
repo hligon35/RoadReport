@@ -4,15 +4,17 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardStack from './DashboardStack';
 import DrivesStack from './DrivesStack';
 import ExpensesStack from './ExpensesStack';
-import SummariesStack from './SummariesStack';
+import ReportsStack from './ReportsStack';
 import SettingsStack from './SettingsStack';
 import { DataContext } from '../context/DataContext';
+import { ModalCloseContext } from '../context/ModalCloseContext';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
 export const BottomTabs = () => {
   const { mileage, expenses } = useContext(DataContext);
+  const { closeAll } = useContext(ModalCloseContext);
 
   const unclassifiedExists = useMemo(() => {
     const uTrips = (mileage || []).some((t) => !t.purpose || String(t.purpose).toLowerCase().includes('misc'));
@@ -21,10 +23,25 @@ export const BottomTabs = () => {
   }, [mileage, expenses]);
 
   return (
-    <Tab.Navigator screenOptions={{ headerShown: false }} initialRouteName="Dashboard">
+    <Tab.Navigator
+      initialRouteName="Dashboard"
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: '#222',
+        tabBarInactiveTintColor: '#888',
+        tabBarStyle: { height: 64, paddingBottom: 8, paddingTop: 6, backgroundColor: '#fff', borderTopWidth: 0.5, borderTopColor: '#eee' },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+      }}
+    >
       <Tab.Screen
         name="Dashboard"
         component={DashboardStack}
+        listeners={() => ({
+          tabPress: () => {
+            try { closeAll(); } catch (e) {}
+          },
+        })}
         options={{
           tabBarIcon: ({ focused, color, size }) => {
             const iconSize = size || 22;
@@ -85,6 +102,7 @@ export const BottomTabs = () => {
       <Tab.Screen
         name="Drives"
         component={DrivesStack}
+        listeners={() => ({ tabPress: () => { try { closeAll(); } catch (e) {} } })}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons name={focused ? 'car' : 'car-outline'} size={size || 22} color={focused ? '#222' : '#888'} />
@@ -94,6 +112,7 @@ export const BottomTabs = () => {
       <Tab.Screen
         name="Expenses"
         component={ExpensesStack}
+        listeners={() => ({ tabPress: () => { try { closeAll(); } catch (e) {} } })}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={size || 22} color={focused ? '#222' : '#888'} />
@@ -101,23 +120,16 @@ export const BottomTabs = () => {
         }}
       />
       <Tab.Screen
-        name="Summaries"
-        component={SummariesStack}
+        name="Reports"
+        component={ReportsStack}
+        listeners={() => ({ tabPress: () => { try { closeAll(); } catch (e) {} } })}
         options={{
           tabBarIcon: ({ focused, color, size }) => (
             <Ionicons name={focused ? 'stats-chart' : 'bar-chart-outline'} size={size || 22} color={focused ? '#222' : '#888'} />
           ),
         }}
       />
-      <Tab.Screen
-        name="Settings"
-        component={SettingsStack}
-        options={{
-          tabBarIcon: ({ focused, color, size }) => (
-            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={size || 22} color={focused ? '#222' : '#888'} />
-          ),
-        }}
-      />
+      {/* Profile/Settings is mounted at root in AppNavigator; no bottom tab entry here */}
     </Tab.Navigator>
   );
 };

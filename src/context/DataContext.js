@@ -6,10 +6,16 @@ export const DataContext = createContext();
 
 const KEY_MILEAGE = 'rr:mileage:v1';
 const KEY_EXPENSES = 'rr:expenses:v1';
+const KEY_VEHICLES = 'rr:vehicles:v1';
+const KEY_CONTACTS = 'rr:contacts:v1';
+const KEY_CATEGORIES = 'rr:categories:v1';
 
 export const DataProvider = ({ children }) => {
   const [mileage, setMileage] = useState([]); // array of routes
   const [expenses, setExpenses] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [contacts, setContacts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,6 +26,12 @@ export const DataProvider = ({ children }) => {
         const e = await AsyncStorage.getItem(KEY_EXPENSES);
         if (m) setMileage(JSON.parse(m));
         if (e) setExpenses(JSON.parse(e));
+        const v = await AsyncStorage.getItem(KEY_VEHICLES);
+        const c = await AsyncStorage.getItem(KEY_CONTACTS);
+        const cat = await AsyncStorage.getItem(KEY_CATEGORIES);
+        if (v) setVehicles(JSON.parse(v));
+        if (c) setContacts(JSON.parse(c));
+        if (cat) setCategories(JSON.parse(cat));
           // DEV: if no mileage persisted and running in dev, seed with 5 dummy routes
         if (__DEV__) {
           const hasMileage = m && Array.isArray(JSON.parse(m)) && JSON.parse(m).length > 0;
@@ -174,6 +186,37 @@ export const DataProvider = ({ children }) => {
     })();
   }, [mileage]);
 
+  // Persist vehicles & contacts
+  useEffect(() => {
+    (async () => {
+      try {
+        await AsyncStorage.setItem(KEY_VEHICLES, JSON.stringify(vehicles));
+      } catch (err) {
+        console.warn('save vehicles error', err);
+      }
+    })();
+  }, [vehicles]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await AsyncStorage.setItem(KEY_CONTACTS, JSON.stringify(contacts));
+      } catch (err) {
+        console.warn('save contacts error', err);
+      }
+    })();
+  }, [contacts]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await AsyncStorage.setItem(KEY_CATEGORIES, JSON.stringify(categories));
+      } catch (err) {
+        console.warn('save categories error', err);
+      }
+    })();
+  }, [categories]);
+
   useEffect(() => {
     (async () => {
       try {
@@ -224,6 +267,45 @@ export const DataProvider = ({ children }) => {
     setExpenses((s) => s.filter((e) => e.id !== expense.id));
   };
 
+  // Vehicles
+  const addVehicle = (vehicle) => {
+    setVehicles((s) => [vehicle, ...s]);
+  };
+
+  const updateVehicle = (updated) => {
+    setVehicles((s) => s.map((v) => (v.id === updated.id ? { ...v, ...updated } : v)));
+  };
+
+  const deleteVehicle = (vehicle) => {
+    setVehicles((s) => s.filter((v) => v.id !== vehicle.id));
+  };
+
+  // Contacts
+  const addContact = (contact) => {
+    setContacts((s) => [contact, ...s]);
+  };
+
+  const updateContact = (updated) => {
+    setContacts((s) => s.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+  };
+
+  const deleteContact = (contact) => {
+    setContacts((s) => s.filter((c) => c.id !== contact.id));
+  };
+
+  // Categories (custom purposes -> categories)
+  const addCategory = (cat) => {
+    setCategories((s) => [cat, ...s]);
+  };
+
+  const updateCategory = (updated) => {
+    setCategories((s) => s.map((c) => (c.id === updated.id ? { ...c, ...updated } : c)));
+  };
+
+  const deleteCategory = (cat) => {
+    setCategories((s) => s.filter((c) => c.id !== cat.id));
+  };
+
   const clearAll = async () => {
     setMileage([]);
     setExpenses([]);
@@ -236,7 +318,30 @@ export const DataProvider = ({ children }) => {
   };
 
   return (
-    <DataContext.Provider value={{ mileage, expenses, loading, addRoute, updateRoute, deleteRoute, addExpense, clearAll }}>
+    <DataContext.Provider value={{
+      mileage,
+      expenses,
+      vehicles,
+      contacts,
+      categories,
+      loading,
+      addRoute,
+      updateRoute,
+      deleteRoute,
+      addExpense,
+      updateExpense,
+      deleteExpense,
+      addVehicle,
+      updateVehicle,
+      deleteVehicle,
+      addContact,
+      updateContact,
+      deleteContact,
+      addCategory,
+      updateCategory,
+      deleteCategory,
+      clearAll,
+    }}>
       {children}
     </DataContext.Provider>
   );

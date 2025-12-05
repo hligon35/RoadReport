@@ -4,6 +4,7 @@ import { View, Text, FlatList, TouchableOpacity, Alert, Image, Modal, TextInput,
 import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useContext } from 'react';
+import { ModalCloseContext } from '../context/ModalCloseContext';
 import { useNavigation } from '@react-navigation/native';
 import { DataContext } from '../context/DataContext';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -206,6 +207,21 @@ const Miscellaneous = () => {
     const unsubscribe = parent.addListener('tabPress', onTabPress);
     return unsubscribe;
   }, [navigation]);
+
+  // register a global close handler so modals/pickers close when navigation requests it
+  const { register } = useContext(ModalCloseContext);
+  React.useEffect(() => {
+    const closer = () => {
+      setBulkEditVisible(false);
+      setDatePickerVisible(false);
+      setTimePickerVisible(false);
+      setSelectionMode(false);
+      setSelectedIds(new Set());
+      setWasBulkOpen(false);
+    };
+    const unregister = register(closer);
+    return () => unregister && unregister();
+  }, [register]);
 
   const classifyRoute = (route, cls) => {
     const updated = { ...route, purpose: cls };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DrivesScreen from '../screens/DrivesScreen';
+import ProfileHeaderButton from '../components/ProfileHeaderButton';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,7 +18,7 @@ const DrivesStack = () => (
     <Stack.Screen
       name="DrivesMain"
       component={DrivesScreen}
-      options={{ title: 'Drives' }}
+      options={{ title: 'Drives', headerRight: () => <ProfileHeaderButton /> }}
     />
   </Stack.Navigator>
 );
