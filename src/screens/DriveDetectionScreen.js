@@ -13,15 +13,15 @@ const DriveDetectionScreen = ({ navigation }) => {
 
   const toggle = async () => {
     if (active) {
-      await DriveDetection.stopDriveMonitoring();
+       await DriveDetection.stopRouteMonitoring();
       setActive(false);
-      Alert.alert('Drive detection', 'Monitoring stopped');
+       Alert.alert('Route detection', 'Monitoring stopped');
     } else {
-      await DriveDetection.startDriveMonitoring((sample) => {
+       await DriveDetection.startRouteMonitoring((sample) => {
         Alert.alert('Drive detected', `Detected a drive: ${sample.distance} km`);
       });
       setActive(true);
-      Alert.alert('Drive detection', 'Monitoring started');
+       Alert.alert('Route detection', 'Monitoring started');
     }
   };
 
@@ -57,7 +57,8 @@ const DriveDetectionScreen = ({ navigation }) => {
     <SafeAreaView style={{ flex: 1 }}>
       <View style={{ padding: 16 }}>
         <Text style={styles.title}>Drive Detection</Text>
-        <Text style={styles.desc}>When enabled, RoadBiz will automatically detect drives in the background and suggest classification.</Text>
+          <Text style={styles.title}>Route Detection</Text>
+        <Text style={styles.desc}>When enabled, RoadBiz will automatically detect routes in the background and suggest classification.</Text>
 
         <View style={{ height: 16 }} />
 
@@ -74,7 +75,7 @@ const DriveDetectionScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Frequent Drives</Text>
+          <Text style={styles.rowLabel}>Frequent Routes</Text>
           <Switch value={frequent} onValueChange={setFrequent} />
         </View>
 

@@ -51,25 +51,25 @@ const SettingsScreen = () => {
 
   const startDetection = async () => {
     try {
-      await DriveDetection.startDriveMonitoring((sample) => {
-        Alert.alert('Drive detected', `Detected a drive: ${sample.distance} km`);
+      await DriveDetection.startRouteMonitoring((sample) => {
+        Alert.alert('Route detected', `Detected a route: ${sample.distance} km`);
       });
       setMonitoringActive(true);
       setDriveDetectionPaused(false);
-      Alert.alert('Drive detection', 'Monitoring started');
+      Alert.alert('Route detection', 'Monitoring started');
     } catch (e) {
-      Alert.alert('Drive detection', 'Failed to start');
+      Alert.alert('Route detection', 'Failed to start');
     }
   };
 
   const stopDetection = async () => {
     try {
-      await DriveDetection.stopDriveMonitoring();
+      await DriveDetection.stopRouteMonitoring();
       setMonitoringActive(false);
       setDriveDetectionPaused(true);
-      Alert.alert('Drive detection', 'Monitoring stopped');
+      Alert.alert('Route detection', 'Monitoring stopped');
     } catch (e) {
-      Alert.alert('Drive detection', 'Failed to stop');
+      Alert.alert('Route detection', 'Failed to stop');
     }
   };
 
@@ -100,7 +100,7 @@ const SettingsScreen = () => {
 
           {rows('ACCOUNT', [
             { title: 'Signed in', value: user ? (user.email || user.name) : 'Not signed in', icon: <Ionicons name="person-circle-outline" size={20} color="#444" />, onPress: () => navigation && navigation.navigate('Account') },
-            { title: 'Drive Detection', value: driveDetectionPaused ? 'Paused' : 'On', icon: <Ionicons name="navigate-outline" size={20} color="#444" />, onPress: () => navigation && navigation.navigate('DriveDetection') },
+            { title: 'Route Detection', value: driveDetectionPaused ? 'Paused' : 'On', icon: <Ionicons name="navigate-outline" size={20} color="#444" />, onPress: () => navigation && navigation.navigate('DriveDetection') },
             { title: 'Help', icon: <Ionicons name="help-circle-outline" size={20} color="#444" />, onPress: () => navigation && navigation.navigate('Help') },
           ])}
 

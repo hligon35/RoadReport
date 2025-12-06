@@ -3,10 +3,10 @@ import { View, Text, StyleSheet } from 'react-native';
 
 const MonthlySummaryBar = ({ totalDrives = 0, totalMiles = 0, loggedValue = 0 }) => {
   return (
-    <View style={styles.container} accessible accessibilityRole="summary" accessibilityLabel={`Monthly summary: ${totalDrives} drives, ${totalMiles} miles, $${loggedValue} logged`}>
+    <View style={styles.container} accessible accessibilityRole="summary" accessibilityLabel={`Monthly summary: ${totalDrives} routes, ${totalMiles} miles, $${loggedValue} logged`}>
       <View style={styles.item}>
-        <Text style={styles.value} accessibilityLabel={`${totalDrives} drives`}>{totalDrives}</Text>
-        <Text style={styles.label}>Drives</Text>
+        <Text style={styles.value} accessibilityLabel={`${totalDrives} routes`}>{totalDrives}</Text>
+        <Text style={styles.label}>Routes</Text>
       </View>
       <View style={styles.item}>
         <Text style={styles.value} accessibilityLabel={`${Number(totalMiles).toFixed(1)} miles`}>{Number(totalMiles).toFixed(1)}</Text>

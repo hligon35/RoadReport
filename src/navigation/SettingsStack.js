@@ -40,7 +40,7 @@ const SettingsStack = () => (
       })}
     />
     <Stack.Screen name="Account" component={AccountScreen} options={{ title: 'Account' }} />
-    <Stack.Screen name="DriveDetection" component={DriveDetectionScreen} options={{ title: 'Drive Detection' }} />
+    <Stack.Screen name="DriveDetection" component={DriveDetectionScreen} options={{ title: 'Route Detection' }} />
     <Stack.Screen name="Help" component={HelpScreen} options={{ title: 'Help' }} />
     <Stack.Screen name="WorkHours" component={WorkHoursScreen} options={{ title: 'Work Hours' }} />
     <Stack.Screen name="EmailSettings" component={EmailSettingsScreen} options={{ title: 'Email Communications' }} />

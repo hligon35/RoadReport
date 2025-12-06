@@ -228,19 +228,23 @@ export const DataProvider = ({ children }) => {
   }, [expenses]);
 
   const addRoute = (route) => {
-    setMileage((s) => [route, ...s]);
+    const now = new Date().toISOString();
+    const withMeta = { ...route, lastEdited: now, createdAt: route.createdAt || now };
+    setMileage((s) => [withMeta, ...s]);
     // fire-and-forget cloud sync
     try {
-      CloudSyncService.syncToCloud([route]);
+      CloudSyncService.syncToCloud([withMeta]);
     } catch (e) {
       console.warn('addRoute cloud sync failed', e);
     }
   };
 
   const updateRoute = (updated) => {
-    setMileage((s) => s.map((t) => (t.id === updated.id ? { ...t, ...updated } : t)));
+    const now = new Date().toISOString();
+    const withMeta = { ...updated, lastEdited: now };
+    setMileage((s) => s.map((t) => (t.id === updated.id ? { ...t, ...withMeta } : t)));
     try {
-      CloudSyncService.syncToCloud([updated]);
+      CloudSyncService.syncToCloud([withMeta]);
     } catch (e) {
       console.warn('updateRoute cloud sync failed', e);
     }
@@ -256,11 +260,15 @@ export const DataProvider = ({ children }) => {
   };
 
   const addExpense = (expense) => {
-    setExpenses((s) => [expense, ...s]);
+    const now = new Date().toISOString();
+    const withMeta = { ...expense, lastEdited: now, createdAt: expense.date || now };
+    setExpenses((s) => [withMeta, ...s]);
   };
 
   const updateExpense = (updated) => {
-    setExpenses((s) => s.map((e) => (e.id === updated.id ? { ...e, ...updated } : e)));
+    const now = new Date().toISOString();
+    const withMeta = { ...updated, lastEdited: now };
+    setExpenses((s) => s.map((e) => (e.id === updated.id ? { ...e, ...withMeta } : e)));
   };
 
   const deleteExpense = (expense) => {

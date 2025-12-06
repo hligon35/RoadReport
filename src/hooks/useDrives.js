@@ -1,9 +1,9 @@
 import { useContext } from 'react';
 import { DataContext } from '../context/DataContext';
 
-export const useDrives = () => {
+export const useRoutes = () => {
   const { mileage, addRoute, updateRoute, deleteRoute } = useContext(DataContext);
-  return { drives: mileage, addRoute, updateRoute, deleteRoute };
+  return { routes: mileage, addRoute, updateRoute, deleteRoute };
 };
 
-export default useDrives;
+export default useRoutes;

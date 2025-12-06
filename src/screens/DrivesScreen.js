@@ -19,7 +19,7 @@ const DrivesScreen = () => {
   const { mileage, expenses, addRoute, updateRoute, deleteRoute } = useContext(DataContext);
 
   // Fallback mock data when there are no drives yet
-  const mockDrives = [
+  const mockDrives = useMemo(() => [
     {
       id: 'm-1',
       start: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
@@ -40,14 +40,16 @@ const DrivesScreen = () => {
       notes: '',
       startCoords: { latitude: 34.0522, longitude: -118.2437 },
     },
-  ];
+  ], []);
 
-  const monthStart = startOfMonth(new Date());
-  const monthEnd = new Date();
-  monthEnd.setHours(23, 59, 59, 999);
+  const monthStart = useMemo(() => startOfMonth(new Date()), []);
+  const monthEnd = useMemo(() => {
+    const d = new Date();
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }, []);
 
   const [query, setQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
   const [lastDeleted, setLastDeleted] = useState(null);
   const undoAnim = useRef(new Animated.Value(0)).current;
 
@@ -57,12 +59,11 @@ const DrivesScreen = () => {
     const totalMiles = drivesThisMonth.reduce((s, d) => s + (d.distance || 0), 0);
     const totalValue = TaxReportService.calculateMileageDeduction(drivesThisMonth, 'business').deduction;
     return { drivesThisMonth, drivesToShow: allDrives, totalMiles, totalValue };
-  }, [mileage, expenses]);
+  }, [mileage, mockDrives, monthStart, monthEnd]);
 
   const filteredDrives = useMemo(() => {
     const q = query.trim().toLowerCase();
     return drivesToShow.filter((d) => {
-      if (statusFilter !== 'all' && d.status !== statusFilter) return false;
       if (!q) return true;
       // search by purpose, notes, or id
       return (
@@ -71,7 +72,7 @@ const DrivesScreen = () => {
         (d.id || '').toLowerCase().includes(q)
       );
     });
-  }, [drivesToShow, query, statusFilter]);
+  }, [drivesToShow, query]);
 
   const handleDelete = (drive) => {
     if (!drive || !drive.id) return;
@@ -88,7 +89,7 @@ const DrivesScreen = () => {
 
   const handleReclassify = (drive) => {
     const newPurpose = drive.purpose === 'Business' ? 'Personal' : 'Business';
-    updateRoute({ ...drive, purpose: newPurpose });
+    updateRoute({ ...drive, purpose: newPurpose, classification: String(newPurpose).toLowerCase() });
   };
 
   const handleSave = (updated) => {
@@ -104,31 +105,21 @@ const DrivesScreen = () => {
       {/* Search and filters */}
       <View style={{ paddingHorizontal: 12, paddingTop: 8, paddingBottom: 6, backgroundColor: '#f6f7fb' }}>
         <TextInput
-          placeholder="Search drives by purpose, notes, or id"
+          placeholder="Search routes by purpose, notes, or id"
           value={query}
           onChangeText={setQuery}
           style={{ backgroundColor: '#fff', padding: 8, borderRadius: 6, borderWidth: 1, borderColor: '#e0e0e0' }}
-          accessibilityLabel="Search drives"
+          accessibilityLabel="Search routes"
         />
-        <View style={{ flexDirection: 'row', marginTop: 8, justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row' }}>
-            {['all', 'logged'].map((s) => (
-                <TouchableOpacity key={s} onPress={() => setStatusFilter(s)} style={{ marginRight: 8 }} accessibilityLabel={`Filter ${s}`}>
-                  <View style={{ paddingVertical: 6, paddingHorizontal: 10, borderRadius: 20, backgroundColor: statusFilter === s ? '#4caf50' : '#fff', borderWidth: 1, borderColor: '#ddd' }}>
-                    <Text style={{ color: statusFilter === s ? '#fff' : '#333' }}>{s === 'all' ? 'All' : s}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-          </View>
-        </View>
+        {/* filters removed: Routes list uses full-text search only */}
       </View>
 
       <SectionList
-        sections={[{ title: 'Drives', data: filteredDrives }]}
+        sections={[{ title: 'Routes', data: filteredDrives }]}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
           // Render tile using Miscellaneous-style layout (no badge)
-          const img = item.mapImage || 'https://via.placeholder.com/160x120?text=Map';
+          const imgSource = item.mapImage ? { uri: item.mapImage } : require('../../assets/icon.png');
           const startAddr = (item.startAddress || item.origin || item.from || item.startLabel || item.startName) || '123 Main St, Anytown';
           const endAddr = (item.endAddress || item.destination || item.to || item.endLabel || item.endName) || '456 Market St, Anytown';
           const startDisplay = startAddr;
@@ -169,21 +160,24 @@ const DrivesScreen = () => {
               rightThreshold={80}
               onSwipeableOpen={(direction) => {
                 try {
-                  if (direction === 'left') handleReclassify({ ...item, purpose: 'Business' }); else handleReclassify({ ...item, purpose: 'Personal' });
-                } catch (e) {}
-                try { swipeRef && swipeRef.current && swipeRef.current.close && swipeRef.current.close(); } catch (e) {}
+                  const classification = direction === 'left' ? 'Business' : 'Personal';
+                  try { updateRoute && updateRoute({ ...item, purpose: classification, classification: String(classification).toLowerCase() }); } catch (e) {}
+                  try { swipeRef && swipeRef.current && swipeRef.current.close && swipeRef.current.close(); } catch (e) {}
+                } catch (e) {
+                  try { swipeRef && swipeRef.current && swipeRef.current.close && swipeRef.current.close(); } catch (e) {}
+                }
               }}
             >
               <View style={{ padding: 12, borderRadius: 10, backgroundColor: '#fff', marginTop: 6, marginBottom: 6, borderWidth: 1, borderColor: '#eee', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, overflow: 'hidden', flexDirection: 'row', minHeight: 150 }}>
-              <View style={{ width: '35%', paddingRight: 8, position: 'relative', marginTop:5 }}>
-                <Image source={{ uri: img }} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
+              <View style={{ width: '30%', paddingRight: 8, position: 'relative', marginTop:5 }}>
+                <Image source={imgSource} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
               </View>
-              <View style={{ width: '55%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
+              <View style={{ width: '54%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                   <Text style={{ fontWeight: '700', textAlign: 'left', alignSelf: 'flex-start' }}>{item.purpose || 'Miscellaneous'}</Text>
                 </View>
                 <Text style={{ color: '#666', marginTop: 15, textAlign: 'left', alignSelf: 'flex-start' }}>{formatted}</Text>
-                <View style={{ flexDirection: 'row', marginTop: 23, marginLeft:-13, alignItems: 'center' }}>
+                    <View style={{ flexDirection: 'row', marginTop: 23, marginLeft:-13, alignItems: 'center' }}>
                   <View style={{ width: 20, alignItems: 'center', marginLeft: 7 }}>
                     <Ionicons name="location-outline" size={20} color="#000" />
                   </View>
@@ -192,13 +186,17 @@ const DrivesScreen = () => {
                     <Text style={{ color: '#333', marginTop: 4, fontSize: 15, lineHeight: 18 }} numberOfLines={2} ellipsizeMode="tail">{endAddr}</Text>
                   </View>
                 </View>
+                    {/* notes field: show actual notes or a visible placeholder when empty */}
+                    <TouchableOpacity activeOpacity={0.7} onPress={() => { /* placeholder for future edit-open */ }}>
+                      <Text style={{ marginTop: 8, color: item.notes ? '#444' : '#9e9e9e', fontSize: 13, fontStyle: item.notes ? 'normal' : 'italic' }}>
+                        {item.notes ? item.notes : 'Add notes…'}
+                      </Text>
+                    </TouchableOpacity>
               </View>
-              <View style={{ width: '10%', justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
-                <View style={{ marginBottom: 40, alignItems: 'flex-end', justifyContent: 'flex-start', width: '100%', marginTop: 0 }}>
-                  <View style={{ backgroundColor: 'rgba(255,165,0,0.75)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, minWidth: 65, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginTop: -3 }}>
-                    <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: '#fff', fontWeight: '800', fontSize: 14 }}>{Number(item.distance || 0).toFixed(1)} mi</Text>
+              <View style={{ width: '16%', minWidth: 72, justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
+                  <View style={{ marginBottom: 40, alignItems: 'flex-end', justifyContent: 'flex-start', width: '100%', marginTop: 0 }}>
+                    <Text style={{ color: '#222', fontWeight: '700', fontSize: 14, textAlign: 'right' }}>{(item.distance != null) ? Number(item.distance).toFixed(1) + ' mi' : '0.0 mi'}</Text>
                   </View>
-                </View>
                 <TouchableOpacity onPress={() => handleSave(item)} style={{ padding: 6, backgroundColor: '#1976d2', borderRadius: 6, marginBottom: 6, alignSelf: 'flex-end' }}>
                   <Ionicons name="pencil" size={16} color="#fff" />
                 </TouchableOpacity>
@@ -213,10 +211,10 @@ const DrivesScreen = () => {
         renderSectionHeader={() => null}
         stickySectionHeadersEnabled={false}
         contentContainerStyle={{ paddingBottom: 120, paddingTop: 8 }}
-        accessibilityLabel="List of drives"
+        accessibilityLabel="List of routes"
         ListEmptyComponent={() => (
-          <View style={{ padding: 24, alignItems: 'center' }}>
-            <Text style={{ color: '#666' }}>No drives match your search.</Text>
+            <View style={{ padding: 24, alignItems: 'center' }}>
+            <Text style={{ color: '#666' }}>No routes match your search.</Text>
           </View>
         )}
       />
@@ -225,7 +223,7 @@ const DrivesScreen = () => {
       {lastDeleted && (
         <Animated.View style={{ position: 'absolute', left: 12, right: 12, bottom: 24, transform: [{ translateY: undoAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }] }}>
           <View style={{ backgroundColor: '#333', padding: 12, borderRadius: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Text style={{ color: '#fff', flex: 1 }}>Drive deleted</Text>
+            <Text style={{ color: '#fff', flex: 1 }}>Route deleted</Text>
             <TouchableOpacity onPress={() => {
               // restore
               addRoute(lastDeleted);

@@ -1,9 +1,9 @@
-// Placeholder for automatic drive detection logic using location/GPS
+// Placeholder for automatic route detection logic using location/GPS
 // Production implementation should use background location, geofencing and a low-power strategy
 
-const startDriveMonitoring = async (onDriveDetected) => {
+const startRouteMonitoring = async (onRouteDetected) => {
   // TODO: hook into location subscription (expo-location or react-native-geolocation)
-  // For now, simulate a detected drive after 3s
+  // For now, simulate a detected route after 3s
   setTimeout(() => {
       const sample = {
       id: `auto:${Date.now()}`,
@@ -14,14 +14,14 @@ const startDriveMonitoring = async (onDriveDetected) => {
       status: 'pending',
       notes: '',
     };
-    onDriveDetected && onDriveDetected(sample);
+    onRouteDetected && onRouteDetected(sample);
   }, 3000);
   return true;
 };
 
-const stopDriveMonitoring = async () => {
+const stopRouteMonitoring = async () => {
   // stop trackers
   return true;
 };
 
-export default { startDriveMonitoring, stopDriveMonitoring };
+export default { startRouteMonitoring, stopRouteMonitoring };

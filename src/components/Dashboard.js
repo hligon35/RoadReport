@@ -171,7 +171,7 @@ const PromoBanner = ({ name }) => (
     <Image source={{ uri: 'https://via.placeholder.com/120x120?text=Logo' }} style={{ width: 120, height: 120, borderRadius: 12, marginRight: 16 }} />
     <View style={{ flex: 1, justifyContent: 'center' }}>
       <Text style={{ color: '#fff', fontSize: 26, fontWeight: '800' }}>{`Good morning${name ? `, ${name}` : ''}`}</Text>
-      <Text style={{ color: '#e3f2fd', marginTop: 10, fontSize: 16 }}>Save time logging drives — try Smart Auto-Categorize</Text>
+      <Text style={{ color: '#e3f2fd', marginTop: 10, fontSize: 16 }}>Save time logging routes — try Smart Auto-Categorize</Text>
       <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center' }}>
         <TouchableOpacity style={{ backgroundColor: '#fff', paddingVertical: 10, paddingHorizontal: 14, borderRadius: 10 }}>
           <Text style={{ color: '#1565c0', fontWeight: '700' }}>Try</Text>
@@ -188,17 +188,26 @@ const Dashboard = () => {
   const { mileage = [], expenses = [] } = useContext(DataContext);
   const navigation = useNavigation();
 
-  const now = new Date();
-  const weekStart = startOfWeek(now);
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6);
-  weekEnd.setHours(23, 59, 59, 999);
+  const now = useMemo(() => new Date(), []);
+  const weekStart = useMemo(() => startOfWeek(now), [now]);
+  const weekEnd = useMemo(() => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + 6);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }, [weekStart]);
 
-  const last30Start = new Date();
-  last30Start.setDate(now.getDate() - 29);
-  last30Start.setHours(0, 0, 0, 0);
-  const last30End = new Date();
-  last30End.setHours(23, 59, 59, 999);
+  const last30Start = useMemo(() => {
+    const d = new Date(now);
+    d.setDate(now.getDate() - 29);
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, [now]);
+  const last30End = useMemo(() => {
+    const d = new Date(now);
+    d.setHours(23, 59, 59, 999);
+    return d;
+  }, [now]);
 
   // Right-side range selector: 'month' (previous calendar month) or 'week' (last 7 days)
   const [rightRange, setRightRange] = useState('month');
@@ -342,8 +351,20 @@ const Dashboard = () => {
       {/* Greeting / promo banner */}
       <PromoBanner />
 
-      {/* Range filter for right-side graphs (pill on right) */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginBottom: GAP }}>
+      {/* Range filter for right-side graphs (legend placed opposite the toggle) */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: GAP }}>
+        {/* Legend for business/personal colors (moved here opposite the toggle) */}
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 12 }}>
+            <View style={{ width: 14, height: 14, backgroundColor: '#4caf50', borderRadius: 3, marginRight: 6 }} />
+            <Text style={{ fontSize: 12, color: '#333' }}>Business</Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ width: 14, height: 14, backgroundColor: '#e53935', borderRadius: 3, marginRight: 6 }} />
+            <Text style={{ fontSize: 12, color: '#333' }}>Personal</Text>
+          </View>
+        </View>
+
         <TouchableOpacity
           onPress={() => setRightRange((r) => (r === 'month' ? 'week' : 'month'))}
           style={{ backgroundColor: '#f4f6f8', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: '#e6e9ed', minWidth: 92, alignItems: 'center', justifyContent: 'center' }}
@@ -435,17 +456,7 @@ const Dashboard = () => {
         })()}
       </View>
 
-      {/* Legend for business/personal colors */}
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 8 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 }}>
-          <View style={{ width: 14, height: 14, backgroundColor: '#4caf50', borderRadius: 3, marginRight: 6 }} />
-          <Text style={{ fontSize: 12, color: '#333' }}>Business</Text>
-        </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 }}>
-          <View style={{ width: 14, height: 14, backgroundColor: '#e53935', borderRadius: 3, marginRight: 6 }} />
-          <Text style={{ fontSize: 12, color: '#333' }}>Personal</Text>
-        </View>
-      </View>
+      {/* Legend moved above beside the range toggle to improve layout */}
 
       {/* Old summaries/layout removed; dashboard focuses on the three metric tiles. */}
     </View>

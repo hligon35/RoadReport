@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,9 +8,19 @@ const ProfileHeaderButton = ({ size = 22 }) => {
   const navigation = useNavigation();
   const { closeAll } = useContext(ModalCloseContext) || {};
 
+  const handlePress = useCallback(() => {
+    try {
+      closeAll && closeAll();
+    } catch (e) {
+      // ignore
+    }
+    navigation.navigate('Profile');
+  }, [closeAll, navigation]);
+
   return (
     <TouchableOpacity
-      onPress={() => { try { closeAll && closeAll(); } catch (e) {} ; navigation.navigate('Profile'); }}
+      onPress={handlePress}
+      activeOpacity={0.8}
       style={{ paddingBottom: 10, width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}
       accessibilityRole="button"
       accessibilityLabel="Open profile"
@@ -19,5 +29,4 @@ const ProfileHeaderButton = ({ size = 22 }) => {
     </TouchableOpacity>
   );
 };
-
-export default ProfileHeaderButton;
+export default React.memo(ProfileHeaderButton);

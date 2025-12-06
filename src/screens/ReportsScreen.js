@@ -13,18 +13,18 @@ const ReportsScreen = ({ route, navigation }) => {
   const [active, setActive] = useState(initialTab === 'expenses' ? 1 : 0);
 
   const { year, month } = monthKey ? parseKey(monthKey) : { year: new Date().getFullYear(), month: new Date().getMonth() };
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 1);
+  const monthStart = useMemo(() => new Date(year, month, 1), [year, month]);
+  const monthEnd = useMemo(() => new Date(year, month + 1, 1), [year, month]);
 
   const monthDrives = useMemo(() => mileage.filter((t) => {
     const d = new Date(t.start || t.date || t.createdAt || null);
     return d && d >= monthStart && d < monthEnd;
-  }), [mileage, monthKey]);
+  }), [mileage, monthStart, monthEnd]);
 
   const monthExpenses = useMemo(() => expenses.filter((e) => {
     const d = new Date(e.date || e.createdAt || null);
     return d && d >= monthStart && d < monthEnd;
-  }), [expenses, monthKey]);
+  }), [expenses, monthStart, monthEnd]);
 
   const showRoutes = () => { setActive(0); };
   const showExpenses = () => { setActive(1); };

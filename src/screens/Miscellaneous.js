@@ -224,12 +224,12 @@ const Miscellaneous = () => {
   }, [register]);
 
   const classifyRoute = (route, cls) => {
-    const updated = { ...route, purpose: cls };
+    const updated = { ...route, purpose: cls, classification: cls ? String(cls).toLowerCase() : cls };
     updateRoute(updated);
   };
 
   const classifyExpense = (expense, cls) => {
-    const updated = { ...expense, classification: cls };
+    const updated = { ...expense, classification: cls ? String(cls).toLowerCase() : cls, purpose: cls };
     updateExpense(updated);
   };
 
@@ -290,7 +290,7 @@ const Miscellaneous = () => {
           keyExtractor={(i) => i.key}
           contentContainerStyle={{ paddingBottom: 40 }}
           renderItem={({ item }) => {
-            const img = item._type === 'route' ? (item.mapImage || 'https://via.placeholder.com/160x120?text=Map') : (item.image || 'https://via.placeholder.com/160x120?text=Receipt');
+            const imgSource = item._type === 'route' ? (item.mapImage ? { uri: item.mapImage } : require('../../assets/icon.png')) : (item.image ? { uri: item.image } : require('../../assets/icon.png'));
             // dummy address fallbacks for display only
             const startAddr = (item.startAddress || item.origin || item.from || item.startLabel || item.startName) || '123 Main St, Anytown';
             const endAddr = (item.endAddress || item.destination || item.to || item.endLabel || item.endName) || '456 Market St, Anytown';
@@ -328,23 +328,31 @@ const Miscellaneous = () => {
 
             return (
               <Swipeable
-                renderLeftActions={renderLeftActions}
-                renderRightActions={renderRightActions}
-                friction={1000} // high friction to avoid tile sliding
-                overshootLeft={false}
-                overshootRight={false}
-                leftThreshold={40}
-                rightThreshold={40}
-                useNativeAnimations={true}
-              >
-                <TouchableOpacity onPress={() => { if (selectionMode) {
-                    const s = new Set(selectedIds);
-                    if (s.has(item.key)) s.delete(item.key); else s.add(item.key);
-                    setSelectedIds(s);
-                  }
-                }} activeOpacity={0.9}>
+                  ref={(r) => { if (r) swipeableRefs.current.set(item.key, r); }}
+                  renderLeftActions={renderLeftActions}
+                  renderRightActions={renderRightActions}
+                  friction={1.2}
+                  overshootLeft={true}
+                  overshootRight={true}
+                  leftThreshold={40}
+                  rightThreshold={40}
+                  useNativeAnimations={true}
+                  onSwipeableOpen={(direction) => {
+                    try {
+                      const classification = direction === 'left' ? 'Business' : 'Personal';
+                      try {
+                        if (item._type === 'route') classifyRoute(item, classification); else classifyExpense(item, classification);
+                      } catch (e) {}
+                      try { const s = swipeableRefs.current.get(item.key); s && s.close && s.close(); } catch (e) {}
+                    } catch (e) {
+                      try { const s = swipeableRefs.current.get(item.key); s && s.close && s.close(); } catch (e) {}
+                    }
+                  }}
+                >
                   <View ref={(r) => { if (r) tileRefs.current.set(item.key, r); }} onLayout={(e) => { tileLayouts.current.set(item.key, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ padding: 12, borderRadius: 10, backgroundColor: selectionMode && selectedIds.has(item.key) ? '#e3f2fd' : '#fff', marginTop: 6, marginBottom: 6, borderWidth: 1, borderColor: '#eee', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, overflow: 'hidden', flexDirection: 'row', minHeight: 150, position: 'relative' }}>
-                    <View ref={(r) => { if (r) imageRefs.current.set(item.key, r); }} onLayout={(e) => { imageLayouts.current.set(item.key, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '35%', paddingRight: 8, marginLeft: 0, position: 'relative', marginTop:5 }}>
+                    {/* Use non-intercepting wrapper View so Swipeable receives gestures; selection uses the checkbox control */}
+                    <View style={{ width: '30%', paddingRight: 8 }}>
+
                       {selectionMode ? (
                         <TouchableOpacity onPress={() => {
                           const s = new Set(selectedIds);
@@ -354,14 +362,14 @@ const Miscellaneous = () => {
                           {selectedIds.has(item.key) ? <Ionicons name="checkmark" size={18} color="#fff" /> : <Ionicons name="ellipse-outline" size={18} color="#9e9e9e" />}
                         </TouchableOpacity>
                       ) : null}
-                      <Image source={{ uri: img }} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
+                      <Image source={imgSource} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
                       {/* Badge placed as part of the image (top-right corner) */}
                       <View style={{ position: 'absolute', right: 0, top: -8, backgroundColor: '#fff', borderRadius: 12, paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: '#eee', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 }}>
                         <Text style={{ fontSize: 11, fontWeight: '700', color: item._type === 'route' ? '#2e7d32' : '#6d4c41' }}>{item._type === 'route' ? 'Route' : 'Expense'}</Text>
                       </View>
                       {/* previously a center pin overlay was here; replaced by measured pin rendered at tile level */}
                     </View>
-                    <View onLayout={(e) => { contentLayouts.current.set(item.key, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '55%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
+                    <View onLayout={(e) => { contentLayouts.current.set(item.key, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '54%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
                       {item._type === 'route' ? (
                         <>
                           <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
@@ -395,6 +403,23 @@ const Miscellaneous = () => {
                               </Text>
                             </View>
                           </View>
+                            {/* notes field for routes: show actual notes or a visible placeholder when empty */}
+                            <TouchableOpacity activeOpacity={0.7} onPress={() => {
+                              setEditItem(item);
+                              setEditName(item.purpose || '');
+                              setEditClassification(item.classification || item.purpose || '');
+                              setEditAmount(item.amount ? String(item.amount) : '');
+                              setEditDistance(item.distance ? String(item.distance) : '');
+                              const raw = item.start || item.createdAt || item.date || '';
+                              setEditDate(raw);
+                              try { setEditDateObj(raw ? new Date(raw) : new Date()); } catch (e) { setEditDateObj(new Date()); }
+                              setEditNotes(item.notes || '');
+                              setBulkEditVisible(true);
+                            }}>
+                              <Text style={{ marginTop: 8, color: item.notes ? '#444' : '#9e9e9e', fontSize: 13, fontStyle: item.notes ? 'normal' : 'italic' }}>
+                                {item.notes ? item.notes : 'Add notes…'}
+                              </Text>
+                            </TouchableOpacity>
                         </>
                       ) : (
                         <>
@@ -419,21 +444,33 @@ const Miscellaneous = () => {
                               </Text>
                             </View>
                           </View>
-                          {item.notes ? <Text style={{ marginTop: 6 }}>{item.notes}</Text> : null}
+                          {/* notes field: show actual notes or a visible placeholder when empty */}
+                          <TouchableOpacity activeOpacity={0.7} onPress={() => {
+                            setEditItem(item);
+                            setEditName(item.description || item.purpose || '');
+                            setEditClassification(item.classification || item.purpose || '');
+                            setEditAmount(item.amount ? String(item.amount) : '');
+                            setEditDistance(item.distance ? String(item.distance) : '');
+                            const raw = item.start || item.createdAt || item.date || '';
+                            setEditDate(raw);
+                            try { setEditDateObj(raw ? new Date(raw) : new Date()); } catch (e) { setEditDateObj(new Date()); }
+                            setEditNotes(item.notes || '');
+                            setBulkEditVisible(true);
+                          }}>
+                            <Text style={{ marginTop: 8, color: item.notes ? '#444' : '#9e9e9e', fontSize: 13, fontStyle: item.notes ? 'normal' : 'italic' }}>
+                              {item.notes ? item.notes : 'Add notes…'}
+                            </Text>
+                          </TouchableOpacity>
                         </>
                       )}
                     </View>
-                      <View style={{ width: '10%', justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
+                      <View style={{ width: '16%', minWidth: 72, justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
                         <View style={{ marginBottom: 40, alignItems: 'flex-end', justifyContent: 'flex-start', width: '100%', marginTop: 0 }}>
-                          {item._type === 'route' ? (
-                            <View style={{ backgroundColor: 'rgba(255,165,0,0.75)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, minWidth: 65, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginTop: -3 }}>
-                              <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: '#fff', fontWeight: '800', fontSize: 14 }}>{Number(item.distance || 0).toFixed(1)} mi</Text>
-                            </View>
-                          ) : (
-                            <View style={{ backgroundColor: 'rgba(255,165,0,0.75)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, minWidth: 70, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginTop: -3 }}>
-                              <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: '#fff', fontWeight: '800', fontSize: 14 }}>{item.amount ? `$${Number(item.amount).toFixed(2)}` : ''}</Text>
-                            </View>
-                          )}
+                              {item._type === 'route' ? (
+                                <Text style={{ color: '#222', fontWeight: '700', fontSize: 14, textAlign: 'right' }}>{(item.distance != null) ? Number(item.distance).toFixed(1) + ' mi' : '0.0 mi'}</Text>
+                              ) : (
+                                <Text style={{ color: '#222', fontWeight: '700', fontSize: 14, textAlign: 'right' }}>{(() => { try { const amt = typeof item.amount === 'number' ? item.amount : (item.amount ? Number(item.amount) : NaN); if (!isFinite(amt)) return ''; return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(amt); } catch (e) { return item.amount ? `$${Number(item.amount).toFixed(2)}` : ''; } })()}</Text>
+                              )}
                         </View>
                         <TouchableOpacity onPress={() => {
                           // open single-item edit
@@ -467,7 +504,6 @@ const Miscellaneous = () => {
                       ) : null}
                     </View>
                   </View>
-                </TouchableOpacity>
               </Swipeable>
             );
           }}

@@ -14,7 +14,7 @@ const adapters = {
     // Firebase adapter skeleton: requires adding firebase SDK and initialization in app.
     syncToCloud: async (payload) => {
       try {
-        // Example: push to Firestore collection 'drives'
+        // Example: push to Firestore collection 'routes'
         // This dynamic loader avoids requiring firebase unless configured.
         if (cloudConfig && cloudConfig.firebaseConfig) {
           try {
@@ -24,7 +24,7 @@ const adapters = {
               firebase.initializeApp(cloudConfig.firebaseConfig);
             }
             const db = firebase.firestore();
-            await Promise.all(payload.map((p) => db.collection('drives').doc(p.id).set(p, { merge: true })));
+            await Promise.all(payload.map((p) => db.collection('routes').doc(p.id).set(p, { merge: true })));
             return { ok: true };
           } catch (innerErr) {
             console.warn('CloudSyncService.firebase dynamic firestore error', innerErr);
@@ -48,7 +48,7 @@ const adapters = {
             firebase.initializeApp(cloudConfig.firebaseConfig);
           }
           const db = firebase.firestore();
-          const snap = await db.collection('drives').get();
+          const snap = await db.collection('routes').get();
           const data = snap.docs.map((d) => d.data());
           return { ok: true, data };
         } catch (e) {
@@ -66,7 +66,7 @@ const adapters = {
         // Example: using @supabase/supabase-js
         // const { createClient } = require('@supabase/supabase-js');
         // const client = createClient(cloudConfig.supabase.url, cloudConfig.supabase.key);
-        // await Promise.all(payload.map(p => client.from('drives').upsert(p)));
+        // await Promise.all(payload.map(p => client.from('routes').upsert(p)));
         console.log('CloudSyncService.supabase.syncToCloud (skeleton)', payload && payload.length ? `${payload.length} items` : payload);
         return { ok: true };
       } catch (err) {

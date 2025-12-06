@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MiniSparkline renders bars for numeric data 1`] = `
+<View
+  accessibilityLabel="Sparkline: recent values 1, 3, 2, 5, 4"
+  accessibilityRole="image"
+  accessible={true}
+  style={
+    [
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+      },
+      {
+        "height": 26,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 2,
+          "marginRight": 4,
+        },
+        {
+          "backgroundColor": "#2e7d32",
+          "height": 4,
+          "width": 10,
+        },
+      ]
+    }
+  />
+  <View
+    style={
+      [
+        {
+          "borderRadius": 2,
+          "marginRight": 4,
+        },
+        {
+          "backgroundColor": "#2e7d32",
+          "height": 13,
+          "width": 10,
+        },
+      ]
+    }
+  />
+  <View
+    style={
+      [
+        {
+          "borderRadius": 2,
+          "marginRight": 4,
+        },
+        {
+          "backgroundColor": "#2e7d32",
+          "height": 9,
+          "width": 10,
+        },
+      ]
+    }
+  />
+  <View
+    style={
+      [
+        {
+          "borderRadius": 2,
+          "marginRight": 4,
+        },
+        {
+          "backgroundColor": "#2e7d32",
+          "height": 22,
+          "width": 10,
+        },
+      ]
+    }
+  />
+  <View
+    style={
+      [
+        {
+          "borderRadius": 2,
+          "marginRight": 4,
+        },
+        {
+          "backgroundColor": "#2e7d32",
+          "height": 18,
+          "width": 10,
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`MiniSparkline renders empty state correctly 1`] = `
+<View
+  accessibilityLabel="Sparkline: no recent data"
+  accessibilityRole="image"
+  accessible={true}
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "transparent",
+        "flexDirection": "row",
+      },
+      {
+        "height": 26,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      {
+        "backgroundColor": "#eee",
+        "flex": 1,
+        "height": 2,
+      }
+    }
+  />
+</View>
+`;

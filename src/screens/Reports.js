@@ -11,7 +11,7 @@ const CircleMeter = ({ percent = 0, size = 64, strokeWidth = 5, claimedColor = '
   // try to use react-native-svg for an arc; fallback to simple ring
   try {
     // dynamic require so bundler doesn't fail if not installed
-    // eslint-disable-next-line global-require
+     
     const Svg = require('react-native-svg').Svg;
     const Circle = require('react-native-svg').Circle;
     const radius = (size - strokeWidth) / 2;
@@ -86,17 +86,18 @@ const Reports = () => {
   const totalBusinessExpenses = useMemo(() => businessExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0), [businessExpenses]);
 
   // compute this month totals (business only)
-  const now = new Date();
+  const now = useMemo(() => new Date(), []);
   const thisMonthStr = now.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   const businessMilesThisMonth = useMemo(() => businessMileage.reduce((s, t) => {
     const d = new Date(t.start || t.date || t.createdAt || null);
     return (d && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) ? s + (Number(t.distance) || 0) : s;
-  }, 0), [businessMileage]);
+  }, 0), [businessMileage, now]);
 
   const businessExpensesThisMonth = useMemo(() => businessExpenses.reduce((s, e) => {
     const d = new Date(e.date || e.createdAt || null);
     return (d && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) ? s + (Number(e.amount) || 0) : s;
-  }, 0), [businessExpenses]);
+  }, 0), [businessExpenses, now]);
+
 
   // build month list from data (include current month)
   const monthsSet = new Set();

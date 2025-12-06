@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { View, Text, StyleSheet, Pressable, TextInput, Button, Alert, Image } from 'react-native';
 
-const Tag = ({ label, color = '#4caf50' }) => (
+const Tag = memo(({ label, color = '#4caf50' }) => (
   <View style={[styles.tag, { backgroundColor: color }]} accessible accessibilityLabel={`${label} tag`}>
     <Text style={styles.tagText}>{label}</Text>
   </View>
-);
+));
 
+Tag.displayName = 'Tag';
+
+/**
+ * DriveCard displays a single drive. Uses local state for expansion and editing.
+ * Memoized to avoid unnecessary re-renders when parent updates unrelated props.
+ */
 const DriveCard = ({ drive = {}, weekDeduction = null, onDelete = () => {}, onReclassify = () => {}, onSave = () => {} }) => {
   const [expanded, setExpanded] = useState(false);
   const [purpose, setPurpose] = useState(drive.purpose || 'Business');
@@ -16,24 +22,24 @@ const DriveCard = ({ drive = {}, weekDeduction = null, onDelete = () => {}, onRe
   const distance = drive.distance ?? 0;
   const value = ((drive.distance ?? 0) * 0.7).toFixed(2); // placeholder calc using business rate
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     Alert.alert('Delete drive', 'Are you sure you want to delete this drive?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => onDelete(drive) },
     ]);
-  };
+  }, [drive, onDelete]);
 
   return (
     <Pressable
       onPress={() => setExpanded((s) => !s)}
-      style={({ pressed }) => [styles.card, pressed && { opacity: 0.9 }]}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       accessible
       accessibilityRole="button"
       accessibilityLabel={`Drive card. ${distance} miles. ${drive.purpose || 'No purpose'}. Double tap to ${expanded ? 'collapse' : 'expand'}`}>
 
       {/* Header row */}
       <View style={styles.header}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.flex1}>
           <Text style={styles.distance}>{Number(distance).toFixed(1)} mi</Text>
           <Text style={styles.small}>{drive.start ? new Date(drive.start).toLocaleString() : ''} → {drive.end ? new Date(drive.end).toLocaleString() : ''}</Text>
         </View>
@@ -48,9 +54,9 @@ const DriveCard = ({ drive = {}, weekDeduction = null, onDelete = () => {}, onRe
         <View style={styles.expanded}>
           {/* Week deduction row */}
           {typeof weekDeduction === 'number' && (
-            <View style={{ marginBottom: 8, padding: 8, backgroundColor: '#f7f9fc', borderRadius: 6 }} accessible accessibilityRole="text">
-              <Text style={{ fontSize: 14, color: '#333', fontWeight: '700' }}>This week's estimated usage</Text>
-              <Text style={{ fontSize: 14, color: '#2e7d32', marginTop: 4 }}>${Number(weekDeduction).toFixed(2)}</Text>
+            <View style={styles.weekDeduction} accessible accessibilityRole="text">
+              <Text style={styles.weekTitle}>Estimated usage this week</Text>
+              <Text style={styles.weekValue}>${Number(weekDeduction).toFixed(2)}</Text>
             </View>
           )}
           {/* Route map preview (static placeholder image). Replace with react-native-maps or static map provider later */}
@@ -187,6 +193,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 12,
   },
+  pressed: { opacity: 0.9 },
+  flex1: { flex: 1 },
+  weekDeduction: { marginBottom: 8, padding: 8, backgroundColor: '#f7f9fc', borderRadius: 6 },
+  weekTitle: { fontSize: 14, color: '#333', fontWeight: '700' },
+  weekValue: { fontSize: 14, color: '#2e7d32', marginTop: 4 },
 });
 
-export default DriveCard;
+export default memo(DriveCard);

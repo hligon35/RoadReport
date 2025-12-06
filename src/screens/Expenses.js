@@ -66,18 +66,18 @@ const Expenses = ({ route }) => {
   }, [layoutTick, pinPositions, list]);
 
   // listen for header add button presses via a changing param
+  const routeOpenAdd = route && route.params ? route.params.openAdd : null;
   React.useEffect(() => {
-    const isOpen = route && route.params && route.params.openAdd;
     // open when truthy, close when cleared/null
-    setShowForm(!!isOpen);
-  }, [route && route.params && route.params.openAdd]);
+    setShowForm(!!routeOpenAdd);
+  }, [routeOpenAdd]);
 
   // when the form is closed in-screen, ensure the header param is cleared
   React.useEffect(() => {
     if (!showForm) {
       try { navigation.setParams({ openAdd: null }); } catch (e) { }
     }
-  }, [showForm]);
+  }, [showForm, navigation]);
 
   // register global closer so header/tab navigation will close the form first
   const { register } = useContext(ModalCloseContext);
@@ -89,10 +89,10 @@ const Expenses = ({ route }) => {
     };
     const unregister = register && register(closer);
     return () => unregister && unregister();
-  }, [register]);
+  }, [register, navigation]);
 
   const renderItem = ({ item }) => {
-    const img = item.image || item.receiptPhoto || 'https://via.placeholder.com/160x120?text=Receipt';
+    const imgSource = item.image ? { uri: item.image } : (item.receiptPhoto ? { uri: item.receiptPhoto } : require('../../assets/icon.png'));
     const dateStr = item.date ? new Date(item.date).toLocaleString() : (item.createdAt ? new Date(item.createdAt).toLocaleString() : '');
 
     const renderLeftActions = (progress, dragX) => {
@@ -112,21 +112,42 @@ const Expenses = ({ route }) => {
       const opacity = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
       return (
         <Animated.View style={{ justifyContent: 'center', paddingRight: 12, transform: [{ translateX: trans }], opacity }}>
-          <TouchableOpacity onPress={() => deleteExpense && deleteExpense(item)} style={{ backgroundColor: '#ff7043', padding: 12, borderRadius: 8 }}>
-            <Text style={{ color: '#fff' }}>Delete</Text>
+          <TouchableOpacity onPress={() => updateExpense && updateExpense({ ...item, classification: 'personal' })} style={{ backgroundColor: '#ff7043', padding: 12, borderRadius: 8 }}>
+            <Text style={{ color: '#fff' }}>Personal</Text>
           </TouchableOpacity>
         </Animated.View>
       );
     };
 
+    const swipeRef = React.createRef();
+
     return (
-      <Swipeable renderLeftActions={renderLeftActions} renderRightActions={renderRightActions} friction={1000} overshootLeft={false} overshootRight={false} leftThreshold={40} rightThreshold={40} useNativeAnimations>
-        <TouchableOpacity activeOpacity={0.9} onPress={() => {}}>
+      <Swipeable
+        ref={swipeRef}
+        renderLeftActions={renderLeftActions}
+        renderRightActions={renderRightActions}
+        friction={1.2}
+        overshootLeft={true}
+        overshootRight={true}
+        leftThreshold={40}
+        rightThreshold={40}
+        useNativeAnimations
+        onSwipeableOpen={(direction) => {
+          try {
+            const classificationKey = direction === 'left' ? 'business' : 'personal';
+            try { updateExpense && updateExpense({ ...item, classification: classificationKey }); } catch (e) {}
+            try { swipeRef && swipeRef.current && swipeRef.current.close && swipeRef.current.close(); } catch (e) {}
+          } catch (e) {
+            try { swipeRef && swipeRef.current && swipeRef.current.close && swipeRef.current.close(); } catch (e) {}
+          }
+        }}
+      >
+        <View>
           <View ref={(r) => { if (r) tileRefs.current.set(item.id, r); }} onLayout={(e) => { tileLayouts.current.set(item.id, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ padding: 12, borderRadius: 10, backgroundColor: '#fff', marginTop: 6, marginBottom: 6, borderWidth: 1, borderColor: '#eee', shadowColor: '#000', shadowOpacity: 0.04, shadowRadius: 6, overflow: 'hidden', flexDirection: 'row', minHeight: 150, position: 'relative' }}>
-            <View ref={(r) => { if (r) imageRefs.current.set(item.id, r); }} onLayout={(e) => { imageLayouts.current.set(item.id, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '35%', paddingRight: 8, position: 'relative', marginTop:5 }}>
-              <Image source={{ uri: img }} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
+            <View ref={(r) => { if (r) imageRefs.current.set(item.id, r); }} onLayout={(e) => { imageLayouts.current.set(item.id, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '30%', paddingRight: 8, position: 'relative', marginTop:5 }}>
+              <Image source={imgSource} style={{ width: '100%', height: 120, borderRadius: 8, backgroundColor: '#f6f6f6' }} resizeMode="cover" />
             </View>
-            <View onLayout={(e) => { contentLayouts.current.set(item.id, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '55%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
+            <View onLayout={(e) => { contentLayouts.current.set(item.id, e.nativeEvent.layout); setLayoutTick((t) => t + 1); }} style={{ width: '54%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: 8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
                 <Text style={{ fontWeight: '700', textAlign: 'left', alignSelf: 'flex-start' }}>{item.description || item.category || 'Expense'}</Text>
               </View>
@@ -152,10 +173,9 @@ const Expenses = ({ route }) => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <View style={{ width: '10%', justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
-              <View style={{ marginBottom: 40, alignItems: 'flex-end', justifyContent: 'flex-start', width: '100%', marginTop: 0 }}>
-                <View style={{ backgroundColor: 'rgba(255,165,0,0.75)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, alignItems: 'center', justifyContent: 'center', alignSelf: 'flex-end', marginTop: -3, minWidth: 110, flexShrink: 0 }}>
-                  <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: '#fff', fontWeight: '800', fontSize: 14, textAlign: 'center' }}>
+            <View style={{ width: '16%', minWidth: 72, justifyContent: 'flex-start', alignItems: 'flex-end', paddingRight: 6, paddingTop: 0 }}>
+                <View style={{ marginBottom: 40, alignItems: 'flex-end', justifyContent: 'flex-start', width: '100%', marginTop: 0 }}>
+                  <Text style={{ color: '#222', fontWeight: '700', fontSize: 14, textAlign: 'right' }}>
                     {(() => {
                       try {
                         const amt = typeof item.amount === 'number' ? item.amount : (item.amount ? Number(item.amount) : NaN);
@@ -167,7 +187,6 @@ const Expenses = ({ route }) => {
                     })()}
                   </Text>
                 </View>
-              </View>
               <TouchableOpacity onPress={() => { setEditInitial(item); setShowForm(true); }} style={{ padding: 6, backgroundColor: '#1976d2', borderRadius: 6, marginBottom: 6, alignSelf: 'flex-end' }}>
                 <Ionicons name="pencil" size={16} color="#fff" />
               </TouchableOpacity>
@@ -187,7 +206,7 @@ const Expenses = ({ route }) => {
               ) : null}
             </View>
           </View>
-        </TouchableOpacity>
+        </View>
       </Swipeable>
     );
   };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, Text, TouchableOpacity, StyleSheet, Switch, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Storage from '../utils/storage';
 
 const KEY_CLASS_ALERTS = 'rr:push_class_alerts:v1';
 const KEY_CLASS_FREQ = 'rr:push_class_freq:v1';
@@ -17,10 +17,10 @@ const PushNotificationsScreen = () => {
   useEffect(() => {
     (async () => {
       try {
-        const a = await AsyncStorage.getItem(KEY_CLASS_ALERTS);
-        const f = await AsyncStorage.getItem(KEY_CLASS_FREQ);
-        const d = await AsyncStorage.getItem(KEY_DEALS);
-        const ft = await AsyncStorage.getItem(KEY_FEATURES);
+        const a = await Storage.loadJSON(KEY_CLASS_ALERTS, null);
+        const f = await Storage.loadJSON(KEY_CLASS_FREQ, null);
+        const d = await Storage.loadJSON(KEY_DEALS, null);
+        const ft = await Storage.loadJSON(KEY_FEATURES, null);
         if (a !== null) setClassificationAlerts(a === '1');
         if (f !== null) setClassificationFreq(f);
         if (d !== null) setDeals(d === '1');
@@ -31,10 +31,10 @@ const PushNotificationsScreen = () => {
     })();
   }, []);
 
-  useEffect(() => { AsyncStorage.setItem(KEY_CLASS_ALERTS, classificationAlerts ? '1' : '0').catch(() => {}); }, [classificationAlerts]);
-  useEffect(() => { AsyncStorage.setItem(KEY_CLASS_FREQ, classificationFreq).catch(() => {}); }, [classificationFreq]);
-  useEffect(() => { AsyncStorage.setItem(KEY_DEALS, deals ? '1' : '0').catch(() => {}); }, [deals]);
-  useEffect(() => { AsyncStorage.setItem(KEY_FEATURES, features ? '1' : '0').catch(() => {}); }, [features]);
+  useEffect(() => { Storage.saveJSON(KEY_CLASS_ALERTS, classificationAlerts ? '1' : '0').catch(() => {}); }, [classificationAlerts]);
+  useEffect(() => { Storage.saveJSON(KEY_CLASS_FREQ, classificationFreq).catch(() => {}); }, [classificationFreq]);
+  useEffect(() => { Storage.saveJSON(KEY_DEALS, deals ? '1' : '0').catch(() => {}); }, [deals]);
+  useEffect(() => { Storage.saveJSON(KEY_FEATURES, features ? '1' : '0').catch(() => {}); }, [features]);
 
   const selectFreq = (val) => {
     if (!classificationAlerts) {

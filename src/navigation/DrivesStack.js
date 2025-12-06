@@ -18,7 +18,7 @@ const DrivesStack = () => (
     <Stack.Screen
       name="DrivesMain"
       component={DrivesScreen}
-      options={{ title: 'Drives', headerRight: () => <ProfileHeaderButton /> }}
+      options={{ title: 'Routes', headerRight: () => <ProfileHeaderButton /> }}
     />
   </Stack.Navigator>
 );

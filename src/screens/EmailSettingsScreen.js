@@ -47,7 +47,7 @@ const EmailSettingsScreen = () => {
           <Text style={styles.rowTitle}>Weekly email</Text>
           <Switch value={weekly} onValueChange={setWeekly} />
         </View>
-        <Text style={styles.rowDesc}>Summary, details & stats for last week's drives.</Text>
+        <Text style={styles.rowDesc}>Summary, details & stats for the previous week.</Text>
 
         <View style={styles.row}>
           <Text style={styles.rowTitle}>Month-end email</Text>

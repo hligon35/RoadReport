@@ -100,7 +100,7 @@ export const BottomTabs = () => {
       />
 
       <Tab.Screen
-        name="Drives"
+        name="Routes"
         component={DrivesStack}
         listeners={() => ({ tabPress: () => { try { closeAll(); } catch (e) {} } })}
         options={{
